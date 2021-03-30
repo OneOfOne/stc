@@ -12,7 +12,11 @@ type SimpleTimedCache struct {
 func (stc *SimpleTimedCache) Set(key, val interface{}, expiry time.Duration) {
 	stc.m.Store(key, val)
 	if expiry > 0 {
-		time.AfterFunc(expiry, func() { stc.m.Delete(key) })
+		time.AfterFunc(expiry, func() {
+			if cv, _ := stc.m.Load(key); cv == val {
+				stc.m.Delete(key)
+			}
+		})
 	}
 }
 

@@ -18,4 +18,11 @@ func TestLeak(t *testing.T) {
 	t.Log(runtime.NumGoroutine(), stc.Get("key"))
 	time.Sleep(time.Millisecond * 150)
 	t.Log(runtime.NumGoroutine(), stc.Get("key"))
+
+	stc.Set("key2", "val1", time.Millisecond*10)
+	stc.Set("key2", "val2", time.Minute)
+	time.Sleep(time.Millisecond * 100)
+	if stc.Get("key2") != "val2" {
+		t.Fatalf("unexpected val: %v", stc.Get("key2"))
+	}
 }
