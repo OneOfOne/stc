@@ -2,11 +2,13 @@ package stc
 
 import (
 	"fmt"
+	"runtime"
 	"testing"
 	"time"
 )
 
-func TestLeak(t *testing.T) {
+func TestSTC(t *testing.T) {
+	n := runtime.NumGoroutine()
 	var stc SimpleTimedCache[string, string]
 	stc.OnSet = func(key, val string) {}
 	i := 0
@@ -38,5 +40,10 @@ func TestLeak(t *testing.T) {
 
 	if v, ok := stc.GetOk("key2"); v != "val3" || !ok {
 		t.Fatalf("unexpected val3: %v", v)
+	}
+	stc.Delete("key2")
+
+	if nn := runtime.NumGoroutine(); nn != n {
+		t.Fatalf("goroutine leak: %d > %d", nn, n)
 	}
 }
