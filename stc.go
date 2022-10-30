@@ -1,102 +1,89 @@
 package stc
 
 import (
-	"sync"
 	"time"
+
+	"go.oneofone.dev/genh"
 )
 
-type entry struct {
-	val      interface{}
-	expireAt int64
+type entry[V any] struct {
+	val V
+	t   *time.Timer
+	exp int64
 }
 
-type SimpleTimedCache struct {
-	m   map[string]*entry
-	mux sync.RWMutex
-}
-
-func (stc *SimpleTimedCache) init() *SimpleTimedCache {
-	if stc.m == nil {
-		stc.m = make(map[string]*entry)
-	}
-	return stc
-}
-
-func (stc *SimpleTimedCache) Set(key string, val interface{}, expiry time.Duration) {
-	expireAt := time.Now().Add(expiry).Unix()
-	stc.mux.Lock()
-	stc.init().m[key] = &entry{val, expireAt}
-	stc.mux.Unlock()
-	if expiry > 0 {
-		time.AfterFunc(expiry, func() {
-			stc.mux.Lock()
-			if e := stc.m[key]; e != nil && e.expireAt == expireAt {
-				delete(stc.m, key)
-			}
-			stc.mux.Unlock()
-		})
-	}
-}
-
-func (stc *SimpleTimedCache) SetWithUpdate(key string, valFn func() interface{}, every time.Duration) {
-	val := valFn()
-	stc.mux.Lock()
-	stc.init().m[key] = &entry{val, -1}
-	stc.mux.Unlock()
-	if every == 0 {
+func (e *entry[V]) cancel() {
+	if e == nil || e.t == nil {
 		return
 	}
-
-	var fn func()
-	fn = func() {
-		e := stc.get(key)
-		if e == nil || e.expireAt != -1 {
-			return
-		}
-		val := valFn()
-		stc.mux.Lock()
-		e = stc.m[key]
-		if e != nil && e.expireAt == -1 {
-			e.val = val
-		}
-		stc.mux.Unlock()
-		if e != nil && e.expireAt == -1 {
-			time.AfterFunc(every, fn)
+	if !e.t.Stop() {
+		select {
+		case <-e.t.C:
+		default:
 		}
 	}
-	time.AfterFunc(every, fn)
 }
 
-func (stc *SimpleTimedCache) Delete(key string) {
-	stc.mux.Lock()
-	delete(stc.m, key)
-	stc.mux.Unlock()
+type SimpleTimedCache[K comparable, V any] struct {
+	m genh.LMap[K, *entry[V]]
+
+	OnSet func(key K, val V)
 }
 
-func (stc *SimpleTimedCache) Exists(key string) bool {
-	stc.mux.RLock()
-	ok := stc.m[key] != nil
-	stc.mux.RUnlock()
-	return ok
+func (stc *SimpleTimedCache[K, V]) Set(key K, val V, expiry time.Duration) {
+	expireAt := time.Now().Add(expiry)
+	stc.m.DeleteGet(key).cancel()
+
+	e := &entry[V]{val: val, exp: expireAt.Unix()}
+	if expiry > 0 {
+		e.t = time.AfterFunc(expiry, func() {
+			stc.m.Update(func(m map[K]*entry[V]) {
+				if e := m[key]; e != nil && time.Until(expireAt) < 1 {
+					delete(m, key)
+				}
+			})
+		})
+	}
+	stc.m.Set(key, e)
+	if stc.OnSet != nil {
+		stc.OnSet(key, val)
+	}
 }
 
-func (stc *SimpleTimedCache) Get(key string) interface{} {
-	if e := stc.get(key); e != nil {
+func (stc *SimpleTimedCache[K, V]) SetWithUpdate(key K, valFn func() V, every time.Duration) {
+	val := valFn()
+	stc.m.DeleteGet(key).cancel()
+
+	e := &entry[V]{val: val, exp: -1}
+	if every > 1 {
+		e.t = time.AfterFunc(every, func() {
+			if e := stc.m.Get(key); e == nil || e.exp != -1 {
+				return
+			}
+			stc.SetWithUpdate(key, valFn, every)
+		})
+	}
+	stc.m.Set(key, e)
+
+	if stc.OnSet != nil {
+		stc.OnSet(key, val)
+	}
+}
+
+func (stc *SimpleTimedCache[K, V]) Delete(key K) {
+	stc.m.DeleteGet(key).cancel()
+}
+
+func (stc *SimpleTimedCache[K, V]) Get(key K) (_ V) {
+	if e := stc.m.Get(key); e != nil {
 		return e.val
 	}
-	return nil
+	return
 }
 
-func (stc *SimpleTimedCache) GetOk(key string) (interface{}, bool) {
-	if e := stc.get(key); e != nil {
+func (stc *SimpleTimedCache[K, V]) GetOk(key K) (_ V, ok bool) {
+	if e := stc.m.Get(key); e != nil {
 		return e.val, true
 	}
-	return nil, false
-}
-
-func (stc *SimpleTimedCache) get(key string) *entry {
-	stc.mux.RLock()
-	e := stc.m[key]
-	stc.mux.RUnlock()
-	return e
+	return
 }

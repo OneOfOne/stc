@@ -1,28 +1,41 @@
 package stc
 
 import (
-	"runtime"
+	"fmt"
 	"testing"
 	"time"
 )
 
 func TestLeak(t *testing.T) {
-	var stc SimpleTimedCache
-	stc.SetWithUpdate("key", func() interface{} {
-		t.Log(runtime.NumGoroutine(), stc.Get("key"))
-		return "val"
+	var stc SimpleTimedCache[string, string]
+	stc.OnSet = func(key, val string) {}
+	i := 0
+	stc.SetWithUpdate("key", func() string {
+		i++
+		return fmt.Sprintf("val:%d", i)
 	}, time.Millisecond*100)
-	t.Log(runtime.NumGoroutine(), stc.Get("key"))
+	if v := stc.Get("key"); v != "val:1" {
+		t.Fatal("expected val:1, got", v)
+	}
 	time.Sleep(time.Millisecond * 350)
+	if v := stc.Get("key"); v != "val:4" {
+		t.Fatal("expected val:4, got", v)
+	}
 	stc.Delete("key")
-	t.Log(runtime.NumGoroutine(), stc.Get("key"))
-	time.Sleep(time.Millisecond * 150)
-	t.Log(runtime.NumGoroutine(), stc.Get("key"))
+	if v := stc.Get("key"); v != "" {
+		t.Fatal("expected empty, got", v)
+	}
 
-	stc.Set("key2", "val1", time.Millisecond*10)
+	stc.Set("key2", "val1", time.Millisecond*100)
+	time.Sleep(time.Millisecond * 350)
+	if v := stc.Get("key2"); v != "" {
+		t.Fatal("expected empty, got", v)
+	}
 	stc.Set("key2", "val2", time.Minute)
-	time.Sleep(time.Millisecond * 100)
-	if stc.Get("key2") != "val2" {
-		t.Fatalf("unexpected val: %v", stc.Get("key2"))
+	time.Sleep(time.Millisecond * 350)
+	stc.Set("key2", "val3", time.Minute)
+
+	if v := stc.Get("key2"); v != "val3" {
+		t.Fatalf("unexpected val3: %v", v)
 	}
 }
