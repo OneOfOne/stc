@@ -34,6 +34,12 @@ func (stc *SimpleTimedCache[K, V]) Delete(key K) {
 	stc.m.Delete(key)
 }
 
+func (stc *SimpleTimedCache[K, V]) MustGet(key K, fn func() V, ttl time.Duration) (_ V) {
+	return stc.m.MustGet(key, func() *entry[V] {
+		return &entry[V]{val: fn(), created: time.Now().Unix(), ttl: ttl}
+	}).val
+}
+
 func (stc *SimpleTimedCache[K, V]) Get(key K) (_ V) {
 	if e := stc.m.Get(key); e != nil {
 		return e.val
