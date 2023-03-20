@@ -2,7 +2,7 @@ module go.oneofone.dev/stc
 
 go 1.19
 
-require go.oneofone.dev/genh v0.0.0-20230316223104-c5d1022834ec
+require go.oneofone.dev/genh v0.0.0-20230303190221-cc03787253db
 
 require (
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
