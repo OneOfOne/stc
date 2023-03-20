@@ -23,7 +23,7 @@ func (stc *SimpleTimedCache[K, V]) Set(key K, val V, ttl time.Duration) {
 	stc.init.Do(func() {
 		go stc.cleanup()
 	})
-	e := &entry[V]{val: val, created: time.Now().Unix(), ttl: ttl}
+	e := &entry[V]{val: val, created: time.Now().UnixNano(), ttl: ttl}
 	stc.m.Set(key, e)
 	if stc.OnSet != nil {
 		stc.OnSet(key, val)
@@ -65,6 +65,7 @@ func (stc *SimpleTimedCache[K, V]) cleanup() {
 			}
 			return true
 		})
+
 		for _, k := range keys {
 			stc.m.Delete(k)
 		}
