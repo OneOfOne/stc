@@ -9,14 +9,8 @@ github.com/vmihailenco/msgpack/v5 v5.3.5 h1:5gO0H1iULLWGhs2H5tbAHIZTV8/cYafcFOr9
 github.com/vmihailenco/msgpack/v5 v5.3.5/go.mod h1:7xyJ9e+0+9SaZT0Wt1RGleJXzli6Q/V5KbhBonMG9jc=
 github.com/vmihailenco/tagparser/v2 v2.0.0 h1:y09buUbR+b5aycVFQs/g70pqKVZNBmxwAhO7/IwNM9g=
 github.com/vmihailenco/tagparser/v2 v2.0.0/go.mod h1:Wri+At7QHww0WTrCBeu4J6bNtoV6mEfg5OIWRZA9qds=
-go.oneofone.dev/genh v0.0.0-20221030162443-736d3fda6b0f h1:BYek91eUDddRVVlgA/Av7on1XDAIfVMEkyJYHG0zosI=
-go.oneofone.dev/genh v0.0.0-20221030162443-736d3fda6b0f/go.mod h1:sl8f49UrathfxBIdonr5XLMYEHTBuo5FiTYBFkZAcpE=
 go.oneofone.dev/genh v0.0.0-20230303190221-cc03787253db h1:Danu7JKNpdm8a/sZS5qbrjU94mLNp8cmjv0qg0FHwpQ=
 go.oneofone.dev/genh v0.0.0-20230303190221-cc03787253db/go.mod h1:RwkoqGiq+jvQztAIBUnNWyXX1DsE89xI23Vey/TgMlQ=
-go.oneofone.dev/genh v0.0.0-20230316223104-c5d1022834ec h1:k9n6NttagHuqRW9/ulhmFj2HXWRELi8QbLAFd5J91NA=
-go.oneofone.dev/genh v0.0.0-20230316223104-c5d1022834ec/go.mod h1:RwkoqGiq+jvQztAIBUnNWyXX1DsE89xI23Vey/TgMlQ=
-go.oneofone.dev/msgpack/v5 v5.3.7 h1:m9TdGL94ZipvZ50vZZjInXfiMItemLpHjEADjUa4WDM=
-go.oneofone.dev/msgpack/v5 v5.3.7/go.mod h1:BVSlTiXOdrDy76raFKkUYYVjBU1OQWqq1BmuLuqM/DU=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c h1:dUUwHk2QECo/6vqA44rthZ8ie2QXMNeKRTHCNY2nXvo=
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=

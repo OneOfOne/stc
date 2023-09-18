@@ -13,7 +13,7 @@ func TestSTC(t *testing.T) {
 	if stc.Get("a") != "b" {
 		t.Fatal("get failed")
 	}
-	time.Sleep(time.Second + time.Millisecond)
+	time.Sleep(time.Second * 2)
 	if stc.Get("a") != "" {
 		t.Fatal("get failed")
 	}
