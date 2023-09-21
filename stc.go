@@ -39,7 +39,7 @@ func (stc *SimpleTimedCache[K, V]) MustGet(key K, fn func() V, ttl time.Duration
 		go stc.cleanup()
 	})
 	return stc.m.MustGet(key, func() *entry[V] {
-		return &entry[V]{val: fn(), created: time.Now().Unix(), ttl: ttl}
+		return &entry[V]{val: fn(), created: time.Now().UnixNano(), ttl: ttl}
 	}).val
 }
 
