@@ -1,10 +1,10 @@
 module go.oneofone.dev/stc
 
-go 1.20
+go 1.25
 
-require go.oneofone.dev/genh v0.0.0-20230303190221-cc03787253db
+require go.oneofone.dev/genh v1.2.0
 
 require (
-	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
+	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 )

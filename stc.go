@@ -14,9 +14,10 @@ type entry[V any] struct {
 }
 
 type SimpleTimedCache[K comparable, V any] struct {
-	m     genh.LMap[K, *entry[V]]
-	OnSet func(key K, val V)
-	init  sync.Once
+	m               genh.LMap[K, *entry[V]]
+	OnSet           func(key K, val V)
+	CleanupInterval time.Duration // zero defaults to 1s for backward compat
+	init            sync.Once
 }
 
 func (stc *SimpleTimedCache[K, V]) Set(key K, val V, ttl time.Duration) {
@@ -59,7 +60,14 @@ func (stc *SimpleTimedCache[K, V]) GetOk(key K) (_ V, ok bool) {
 
 func (stc *SimpleTimedCache[K, V]) cleanup() {
 	for {
-		time.Sleep(time.Second)
+		interval := stc.CleanupInterval
+
+		if interval < time.Second {
+			interval = time.Second
+		}
+
+		time.Sleep(interval)
+
 		var keys []K
 		now := time.Now().UnixNano()
 		stc.m.ForEach(func(key K, e *entry[V]) bool {
