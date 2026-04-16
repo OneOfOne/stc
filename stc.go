@@ -59,13 +59,13 @@ func (stc *SimpleTimedCache[K, V]) GetOk(key K) (_ V, ok bool) {
 }
 
 func (stc *SimpleTimedCache[K, V]) cleanup() {
+	interval := stc.CleanupInterval
+
+	if interval < time.Second {
+		interval = time.Second
+	}
+
 	for {
-		interval := stc.CleanupInterval
-
-		if interval < time.Second {
-			interval = time.Second
-		}
-
 		time.Sleep(interval)
 
 		var keys []K
